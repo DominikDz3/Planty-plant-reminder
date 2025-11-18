@@ -1,4 +1,4 @@
-package com.example.planty.database.entity
+package com.example.planty.data.database.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
