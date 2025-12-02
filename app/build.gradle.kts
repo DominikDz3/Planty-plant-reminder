@@ -9,13 +9,13 @@ plugins {
 android {
     namespace = "com.example.planty"
     compileSdk {
-        version = release(31)
+        version = release(35)
     }
 
     defaultConfig {
         applicationId = "com.example.planty"
-        minSdk = 24
-        targetSdk = 36
+        minSdk = 32
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -66,4 +66,6 @@ dependencies {
     implementation(libs.datastore.preferences)
     implementation(libs.work.runtime.ktx)
     implementation(libs.coil.compose)
+    implementation(libs.icons.extended)
+    ksp(libs.room.compiler)
 }

@@ -11,7 +11,7 @@ interface WaterHistoryDao {
     @Insert
     fun insertHistory(history: WaterHistory)
 
-    @Query("SELECT * FROM watering_history")
+    @Query("SELECT * FROM watering_history WHERE plantId = :plantId ORDER BY wateredDate DESC")
     fun getWaterHistoryForPlant(plantId: Int): Flow<List<WaterHistory>>
 
     @Query("SELECT * FROM watering_history")

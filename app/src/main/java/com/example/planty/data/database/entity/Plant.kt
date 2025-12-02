@@ -10,7 +10,7 @@ data class Plant (
     val id: Int,
     val name: String,
     val description: String,
-    val photoUrl: String?,
+    val photoUri: String?,
     val wateringFrequencyDays: Int,
     val lastWatered: Long
 )
