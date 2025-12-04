@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface WaterHistoryDao {
     @Insert
-    fun insertHistory(history: WaterHistory)
+    suspend fun insertHistory(history: WaterHistory)
 
     @Query("SELECT * FROM watering_history WHERE plantId = :plantId ORDER BY wateredDate DESC")
     fun getWaterHistoryForPlant(plantId: Int): Flow<List<WaterHistory>>

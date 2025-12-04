@@ -12,13 +12,13 @@ import kotlinx.coroutines.flow.Flow
 interface PlantDao {
 
     @Insert
-    fun insert(plant: Plant)
+    suspend fun insert(plant: Plant)
 
     @Update
-    fun update(plant: Plant)
+    suspend fun update(plant: Plant)
 
     @Delete
-    fun delete(plant: Plant)
+    suspend fun delete(plant: Plant)
 
     @Query("SELECT * FROM Plant WHERE id = :plantId")
     fun getPlantById(plantId :Int): Flow<Plant>

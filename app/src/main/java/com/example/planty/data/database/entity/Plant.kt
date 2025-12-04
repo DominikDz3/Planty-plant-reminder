@@ -7,10 +7,10 @@ import androidx.room.PrimaryKey
 data class Plant (
     @PrimaryKey(autoGenerate = true)
 
-    val id: Int,
+    val id: Int = 0,
     val name: String,
     val description: String,
-    val photoUri: String?,
+    val photoUris: List<String>,
     val wateringFrequencyDays: Int,
     val lastWatered: Long
 )

@@ -16,15 +16,15 @@ class PlantRepository(
 
     fun getPlantById(plantId: Int): Flow<Plant> = plantDao.getPlantById(plantId)
 
-    fun addPlant(plant: Plant) {
+    suspend fun addPlant(plant: Plant) {
         plantDao.insert(plant)
     }
 
-    fun updatePlant(plant: Plant) {
+    suspend fun updatePlant(plant: Plant) {
         plantDao.update(plant)
     }
 
-    fun deletePlant(plant: Plant) {
+    suspend fun deletePlant(plant: Plant) {
         plantDao.delete(plant)
     }
 
@@ -36,7 +36,7 @@ class PlantRepository(
         return waterHistoryDao.getWaterHistoryForPlant(plantId)
     }
 
-    fun addWaterHistory(plantId: Int, wateredDate: Long) {
+    suspend fun addWaterHistory(plantId: Int, wateredDate: Long) {
         val historyEntry = WaterHistory(plantId = plantId, wateredDate = wateredDate)
         waterHistoryDao.insertHistory(historyEntry)
     }

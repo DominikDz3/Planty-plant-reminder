@@ -1,16 +1,17 @@
 package com.example.planty.data.database
 
 import android.content.Context
-import com.example.planty.data.database.entity.Plant
-import com.example.planty.data.database.entity.WaterHistory
-import com.example.planty.data.database.dao.PlantDao
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters // <-- WAŻNE
+import com.example.planty.data.database.dao.PlantDao
 import com.example.planty.data.database.dao.WaterHistoryDao
+import com.example.planty.data.database.entity.Plant
+import com.example.planty.data.database.entity.WaterHistory
 
-
-@Database(version = 1, entities = [Plant::class, WaterHistory::class])
+@Database(version = 1, entities = [Plant::class, WaterHistory::class], exportSchema = false)
+@TypeConverters(Converters::class)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun getPlantDao(): PlantDao
     abstract fun getWaterHistoryDao(): WaterHistoryDao
@@ -25,7 +26,9 @@ abstract class AppDatabase: RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "Planty_database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration(false)
+                    .build()
                 INSTANCE = instance
                 instance
             }
