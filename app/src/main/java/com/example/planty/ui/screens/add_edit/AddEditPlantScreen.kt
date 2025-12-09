@@ -7,6 +7,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -17,12 +19,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +38,9 @@ import coil3.compose.AsyncImage
 import com.example.planty.ui.PlantyLightBackground
 import com.example.planty.ui.PlantyPrimary
 import com.example.planty.ui.PlantySecondary
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +52,9 @@ fun AddEditPlantScreen(
     val description by viewModel.plantDescription.collectAsState()
     val frequency by viewModel.wateringFreq.collectAsState()
     val photoUris by viewModel.photoUris.collectAsState()
+    val lastWateredDate by viewModel.lastWateredDate.collectAsState()
+
+    var showDatePicker by remember { mutableStateOf(false) }
 
     val multiplePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 5),
@@ -55,6 +62,32 @@ fun AddEditPlantScreen(
             viewModel.onPhotosSelected(uris.map { it.toString() })
         }
     )
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = lastWateredDate
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let {
+                        viewModel.onDateChange(it)
+                    }
+                    showDatePicker = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Anuluj")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
 
     Scaffold(
         containerColor = PlantyLightBackground,
@@ -156,10 +189,41 @@ fun AddEditPlantScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            val dateFormatter = remember { SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()) }
+            val dateText = remember(lastWateredDate) { dateFormatter.format(Date(lastWateredDate)) }
+
+            OutlinedTextField(
+                value = dateText,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Data ostatniego podlania") },
+                trailingIcon = {
+                    Icon(Icons.Default.CalendarToday, contentDescription = null, tint = PlantyPrimary)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = PlantyPrimary,
+                    unfocusedBorderColor = PlantyPrimary.copy(alpha = 0.5f)
+                ),
+                interactionSource = remember { MutableInteractionSource() }
+                    .also { interactionSource ->
+                        LaunchedEffect(interactionSource) {
+                            interactionSource.interactions.collect {
+                                if (it is PressInteraction.Release) {
+                                    showDatePicker = true
+                                }
+                            }
+                        }
+                    }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             OutlinedTextField(
                 value = frequency,
                 onValueChange = viewModel::onFrequencyChange,
-                label = { Text("Częstotliwość podlewania (dni)") },
+                label = { Text("Co ile dni podlewać?") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),

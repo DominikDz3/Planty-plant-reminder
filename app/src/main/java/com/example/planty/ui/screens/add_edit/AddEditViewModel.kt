@@ -28,6 +28,9 @@ class AddEditViewModel(
     private val _photoUris = MutableStateFlow<List<String>>(emptyList())
     val photoUris = _photoUris.asStateFlow()
 
+    private val _lastWateredDate = MutableStateFlow(System.currentTimeMillis())
+    val lastWateredDate = _lastWateredDate.asStateFlow()
+
     fun onNameChange(newName: String) {
         _plantName.value = newName
     }
@@ -50,10 +53,15 @@ class AddEditViewModel(
         _photoUris.value = _photoUris.value.filter { it != uri }
     }
 
+    fun onDateChange(newDate: Long) {
+        _lastWateredDate.value = newDate
+    }
+
     fun savePlant(onSuccess: () -> Unit) {
         val name = _plantName.value
         val freq = _wateringFreq.value.toIntOrNull()
         val description = _plantDescription.value
+        val lastWatered = _lastWateredDate.value
 
         if (name.isBlank() || freq == null) {
             return
@@ -66,12 +74,13 @@ class AddEditViewModel(
                 description = description,
                 wateringFrequencyDays = freq,
                 photoUris = _photoUris.value,
-                lastWatered = System.currentTimeMillis()
+                lastWatered = lastWatered
             )
             repository.addPlant(newPlant)
             onSuccess()
         }
     }
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
