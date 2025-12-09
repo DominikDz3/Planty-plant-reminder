@@ -16,7 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
 import androidx.compose.material3.*
@@ -60,10 +60,10 @@ fun AddEditPlantScreen(
         containerColor = PlantyLightBackground,
         topBar = {
             TopAppBar(
-                title = { Text("New Plant", color = PlantyPrimary, fontWeight = FontWeight.Bold) },
+                title = { Text("Nowa roślina", color = PlantyPrimary, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Wróć", tint = PlantyPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Wróć", tint = PlantyPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = PlantyLightBackground)
@@ -130,7 +130,7 @@ fun AddEditPlantScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = viewModel::onNameChange,
-                label = { Text("Plant Name") },
+                label = { Text("Nazwa rośliny") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -144,7 +144,7 @@ fun AddEditPlantScreen(
             OutlinedTextField(
                 value = description,
                 onValueChange = viewModel::onDescriptionChange,
-                label = { Text("Description") },
+                label = { Text("Opis") },
                 modifier = Modifier.fillMaxWidth().height(120.dp),
                 shape = RoundedCornerShape(12.dp),
                 maxLines = 5,
@@ -159,7 +159,7 @@ fun AddEditPlantScreen(
             OutlinedTextField(
                 value = frequency,
                 onValueChange = viewModel::onFrequencyChange,
-                label = { Text("Watering Frequency (days)") },
+                label = { Text("Częstotliwość podlewania (dni)") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -179,7 +179,7 @@ fun AddEditPlantScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = PlantyPrimary),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text("Save Plant", fontSize = 18.sp)
+                Text("Zapisz roślinę", fontSize = 18.sp)
             }
         }
     }
@@ -202,7 +202,7 @@ fun AddPhotoButton(modifier: Modifier = Modifier.size(100.dp, 160.dp), onClick: 
                 tint = PlantyPrimary,
                 modifier = Modifier.size(32.dp)
             )
-            Text("Add", color = PlantyPrimary, fontSize = 12.sp)
+            Text("Wybierz zdjęcie", color = PlantyPrimary, fontSize = 12.sp)
         }
     }
 }

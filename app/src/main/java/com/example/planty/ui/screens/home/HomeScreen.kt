@@ -22,7 +22,6 @@ import com.example.planty.ui.PlantyPrimary
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    // Wstrzykujemy ViewModel używając naszej Fabryki, którą stworzyliśmy wcześniej
     viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory),
     onNavigateToAddPlant: () -> Unit,
     onNavigateToSettings: () -> Unit,
@@ -37,7 +36,7 @@ fun HomeScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Plants →",
+                        text = "Zapisane rośliny →",
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = PlantyPrimary
