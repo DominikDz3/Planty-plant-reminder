@@ -27,7 +27,6 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToDetails: (Int) -> Unit
 ) {
-    // Stan list z ViewModel
     val plantList by viewModel.plantList.collectAsState()
 
     Scaffold(
@@ -67,7 +66,6 @@ fun HomeScreen(
         }
     ) { paddingValues ->
 
-        // Lista Roślin
         LazyColumn(
             modifier = Modifier.padding(paddingValues)
         ) {

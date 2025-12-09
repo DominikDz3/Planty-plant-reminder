@@ -26,4 +26,7 @@ interface PlantDao {
     @Query("SELECT * FROM Plant ORDER BY name ASC")
     fun getAllPlants(): Flow<List<Plant>>
 
+    @Query("SELECT * FROM Plant")
+    suspend fun getAllPlantsList(): List<Plant>
+
 }
