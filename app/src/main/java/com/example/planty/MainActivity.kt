@@ -9,25 +9,47 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.planty.notifications.NotificationService
 import com.example.planty.ui.screens.add_edit.AddEditPlantScreen
 import com.example.planty.ui.screens.home.HomeScreen
+import com.example.planty.ui.screens.settings.SettingsScreen
+import com.example.planty.ui.settings.SettingsViewModel
 import com.example.planty.ui.PlantyTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val notificationService = NotificationService(this)
+        notificationService.createNotificationChannel()
+
         setContent {
-            PlantyTheme {
+            val settingsViewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory)
+            val themeMode by settingsViewModel.themeMode.collectAsState()
+
+            val darkTheme = when (themeMode) {
+                "LIGHT" -> false
+                "DARK" -> true
+                else -> isSystemInDarkTheme()
+            }
+
+            PlantyTheme(
+                darkTheme = darkTheme,
+            ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -72,7 +94,7 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate("add_plant")
                                 },
                                 onNavigateToSettings = {
-                                    Toast.makeText(context, "Ustawienia (wkrótce)", Toast.LENGTH_SHORT).show()
+                                    navController.navigate("settings")
                                 },
                                 onNavigateToDetails = { plantId ->
                                     Toast.makeText(context, "Szczegóły rośliny ID: $plantId", Toast.LENGTH_SHORT).show()
@@ -82,6 +104,15 @@ class MainActivity : ComponentActivity() {
 
                         composable("add_plant") {
                             AddEditPlantScreen(
+                                onNavigateBack = {
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+
+                        composable("settings") {
+                            SettingsScreen(
+                                viewModel = settingsViewModel,
                                 onNavigateBack = {
                                     navController.popBackStack()
                                 }

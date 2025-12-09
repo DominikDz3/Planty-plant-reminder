@@ -1,33 +1,30 @@
 package com.example.planty.data.database.datastore
 
 import android.content.Context
-import android.content.SharedPreferences
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import androidx.core.content.edit
+import kotlinx.coroutines.flow.map
 
-class SettingsRepository(context: Context) {
-    private val sharedPreferences: SharedPreferences = context.getSharedPreferences("planty_settings", Context.MODE_PRIVATE)
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "planty_preferences")
 
-   companion object {
-       private const val THEME_MODE_KEY = "theme_mode"
-       private const val DYNAMIC_COLOR_KEY = "dynamic_color"
-   }
+class SettingsRepository(private val context: Context) {
 
-    private val _themeMode = MutableStateFlow(sharedPreferences.getString(THEME_MODE_KEY, "SYSTEM") ?: "System")
-    private val _isDynamicColor = MutableStateFlow(sharedPreferences.getBoolean(DYNAMIC_COLOR_KEY, true))
-
-    val themeMode: Flow<String> = _themeMode.asStateFlow()
-    val isDynamicColor: Flow<Boolean> = _isDynamicColor.asStateFlow()
-
-    fun saveThemeMode(mode: String) {
-        sharedPreferences.edit { putString(THEME_MODE_KEY, mode) }
-        _themeMode.value = mode
+    private object PreferencesKeys {
+        val THEME_MODE = stringPreferencesKey("theme_mode")
     }
 
-    fun saveDynamicColor(isDynamic: Boolean) {
-        sharedPreferences.edit { putBoolean(DYNAMIC_COLOR_KEY, isDynamic) }
-        _isDynamicColor.value = isDynamic
+    val themeMode: Flow<String> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.THEME_MODE] ?: "SYSTEM"
+        }
+
+    suspend fun saveThemeMode(mode: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.THEME_MODE] = mode
+        }
     }
 }

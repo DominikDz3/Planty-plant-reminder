@@ -24,9 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.planty.data.database.entity.Plant
-import com.example.planty.ui.PlantyPrimary
-import com.example.planty.ui.PlantySecondary
-import com.example.planty.ui.PlantyTextSecondary
 
 @Composable
 fun PlantListItem(
@@ -48,7 +45,7 @@ fun PlantListItem(
                 modifier = Modifier
                     .size(64.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(PlantySecondary),
+                    .background(MaterialTheme.colorScheme.secondaryContainer),
                 contentAlignment = Alignment.Center
             ) {
                 val mainPhoto = plant.photoUris.firstOrNull()
@@ -64,7 +61,7 @@ fun PlantListItem(
                     Icon(
                         imageVector = Icons.Rounded.LocalFlorist,
                         contentDescription = null,
-                        tint = PlantyPrimary.copy(alpha = 0.5f),
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.5f),
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -77,7 +74,7 @@ fun PlantListItem(
             ) {
                 Text(
                     text = plant.name,
-                    color = PlantyPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -89,7 +86,7 @@ fun PlantListItem(
 
                 Text(
                     text = secondaryText,
-                    color = PlantyTextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -101,7 +98,7 @@ fun PlantListItem(
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = "Opcje",
-                        tint = PlantyPrimary
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -127,7 +124,7 @@ fun PlantListItem(
         }
 
         HorizontalDivider(
-            color = PlantySecondary.copy(alpha = 0.5f),
+            color = MaterialTheme.colorScheme.outlineVariant,
             thickness = 1.dp,
             modifier = Modifier.padding(horizontal = 16.dp)
         )

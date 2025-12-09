@@ -11,13 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.planty.ui.PlantyLightBackground
-import com.example.planty.ui.PlantyPrimary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,7 +26,7 @@ fun HomeScreen(
     val plantList by viewModel.plantList.collectAsState()
 
     Scaffold(
-        containerColor = PlantyLightBackground,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
@@ -38,7 +34,7 @@ fun HomeScreen(
                         text = "Zapisane rośliny →",
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
-                        color = PlantyPrimary
+                        color = MaterialTheme.colorScheme.primary
                     )
                 },
                 actions = {
@@ -46,20 +42,20 @@ fun HomeScreen(
                         Icon(
                             imageVector = Icons.Outlined.Settings,
                             contentDescription = "Ustawienia",
-                            tint = PlantyPrimary
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = PlantyLightBackground
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavigateToAddPlant,
-                containerColor = PlantyPrimary,
-                contentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Dodaj roślinę")
             }

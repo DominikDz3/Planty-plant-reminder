@@ -27,7 +27,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -35,9 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
-import com.example.planty.ui.PlantyLightBackground
-import com.example.planty.ui.PlantyPrimary
-import com.example.planty.ui.PlantySecondary
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -90,16 +86,28 @@ fun AddEditPlantScreen(
     }
 
     Scaffold(
-        containerColor = PlantyLightBackground,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Nowa roślina", color = PlantyPrimary, fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        "Nowa roślina",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Wróć", tint = PlantyPrimary)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Wróć",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = PlantyLightBackground)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         }
     ) { paddingValues ->
@@ -132,10 +140,15 @@ fun AddEditPlantScreen(
                                 modifier = Modifier
                                     .align(Alignment.TopEnd)
                                     .padding(4.dp)
-                                    .background(Color.White.copy(alpha = 0.7f), CircleShape)
+                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), CircleShape)
                                     .size(24.dp)
                             ) {
-                                Icon(Icons.Default.Close, contentDescription = "Usuń", modifier = Modifier.size(16.dp))
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = "Usuń",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
                             }
                         }
                     }
@@ -167,8 +180,8 @@ fun AddEditPlantScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = PlantyPrimary,
-                    unfocusedBorderColor = PlantyPrimary.copy(alpha = 0.5f)
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
                 )
             )
 
@@ -182,8 +195,8 @@ fun AddEditPlantScreen(
                 shape = RoundedCornerShape(12.dp),
                 maxLines = 5,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = PlantyPrimary,
-                    unfocusedBorderColor = PlantyPrimary.copy(alpha = 0.5f)
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
                 )
             )
 
@@ -198,13 +211,17 @@ fun AddEditPlantScreen(
                 readOnly = true,
                 label = { Text("Data ostatniego podlania") },
                 trailingIcon = {
-                    Icon(Icons.Default.CalendarToday, contentDescription = null, tint = PlantyPrimary)
+                    Icon(
+                        Icons.Default.CalendarToday,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = PlantyPrimary,
-                    unfocusedBorderColor = PlantyPrimary.copy(alpha = 0.5f)
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
                 ),
                 interactionSource = remember { MutableInteractionSource() }
                     .also { interactionSource ->
@@ -228,8 +245,8 @@ fun AddEditPlantScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = PlantyPrimary,
-                    unfocusedBorderColor = PlantyPrimary.copy(alpha = 0.5f)
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
                 )
             )
 
@@ -240,10 +257,17 @@ fun AddEditPlantScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PlantyPrimary),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text("Zapisz roślinę", fontSize = 18.sp)
+                Text(
+                    "Zapisz roślinę",
+                    fontSize = 18.sp,
+                    // ZMIANA: Kolor tekstu na przycisku
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
             }
         }
     }
@@ -254,19 +278,23 @@ fun AddPhotoButton(modifier: Modifier = Modifier.size(100.dp, 160.dp), onClick: 
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(PlantySecondary)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
             .clickable { onClick() }
-            .border(2.dp, PlantyPrimary.copy(alpha = 0.2f), RoundedCornerShape(16.dp)),
+            .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(16.dp)),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 imageVector = Icons.Rounded.AddPhotoAlternate,
                 contentDescription = null,
-                tint = PlantyPrimary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(32.dp)
             )
-            Text("Wybierz zdjęcie", color = PlantyPrimary, fontSize = 12.sp)
+            Text(
+                "Wybierz zdjęcie",
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 12.sp
+            )
         }
     }
 }
