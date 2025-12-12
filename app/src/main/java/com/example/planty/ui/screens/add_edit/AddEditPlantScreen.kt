@@ -1,6 +1,9 @@
 package com.example.planty.ui.screens.add_edit
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,7 +23,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,10 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import java.text.SimpleDateFormat
@@ -44,6 +51,8 @@ fun AddEditPlantScreen(
     viewModel: AddEditViewModel = viewModel(factory = AddEditViewModel.Factory),
     onNavigateBack: () -> Unit
 ) {
+    val context = LocalContext.current
+
     val name by viewModel.plantName.collectAsState()
     val description by viewModel.plantDescription.collectAsState()
     val frequency by viewModel.wateringFreq.collectAsState()
@@ -51,11 +60,31 @@ fun AddEditPlantScreen(
     val lastWateredDate by viewModel.lastWateredDate.collectAsState()
 
     var showDatePicker by remember { mutableStateOf(false) }
+    var showImageSourceDialog by remember { mutableStateOf(false) }
 
-    val multiplePhotoPickerLauncher = rememberLauncherForActivityResult(
+    val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 5),
         onResult = { uris: List<Uri> ->
             viewModel.onPhotosSelected(uris.map { it.toString() })
+        }
+    )
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success ->
+            viewModel.onPhotoTaken(success)
+        }
+    )
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            if (isGranted) {
+                val uri = viewModel.createUriForCamera()
+                cameraLauncher.launch(uri)
+            } else {
+                Toast.makeText(context, "Wymagane uprawnienie do aparatu", Toast.LENGTH_SHORT).show()
+            }
         }
     )
 
@@ -83,6 +112,45 @@ fun AddEditPlantScreen(
         ) {
             DatePicker(state = datePickerState)
         }
+    }
+
+    if (showImageSourceDialog) {
+        AlertDialog(
+            onDismissRequest = { showImageSourceDialog = false },
+            title = { Text("Dodaj zdjęcie") },
+            text = { Text("Skąd chcesz dodać zdjęcie?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showImageSourceDialog = false
+                    val permission = Manifest.permission.CAMERA
+                    if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+                        val uri = viewModel.createUriForCamera()
+                        cameraLauncher.launch(uri)
+                    } else {
+                        permissionLauncher.launch(permission)
+                    }
+                }) {
+                    Icon(Icons.Default.CameraAlt, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Aparat")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showImageSourceDialog = false
+                    galleryLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                }) {
+                    Icon(Icons.Default.Image, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Galeria")
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            textContentColor = MaterialTheme.colorScheme.onSurface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface
+        )
     }
 
     Scaffold(
@@ -153,21 +221,13 @@ fun AddEditPlantScreen(
                         }
                     }
                     item {
-                        AddPhotoButton(onClick = {
-                            multiplePhotoPickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        })
+                        AddPhotoButton(onClick = { showImageSourceDialog = true })
                     }
                 }
             } else {
                 AddPhotoButton(
                     modifier = Modifier.size(150.dp),
-                    onClick = {
-                        multiplePhotoPickerLauncher.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                        )
-                    }
+                    onClick = { showImageSourceDialog = true }
                 )
             }
 
@@ -265,7 +325,6 @@ fun AddEditPlantScreen(
                 Text(
                     "Zapisz roślinę",
                     fontSize = 18.sp,
-                    // ZMIANA: Kolor tekstu na przycisku
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }
@@ -274,7 +333,7 @@ fun AddEditPlantScreen(
 }
 
 @Composable
-fun AddPhotoButton(modifier: Modifier = Modifier.size(100.dp, 160.dp), onClick: () -> Unit) {
+fun AddPhotoButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
@@ -291,7 +350,7 @@ fun AddPhotoButton(modifier: Modifier = Modifier.size(100.dp, 160.dp), onClick: 
                 modifier = Modifier.size(32.dp)
             )
             Text(
-                "Wybierz zdjęcie",
+                "Dodaj zdjęcie",
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 12.sp
             )
