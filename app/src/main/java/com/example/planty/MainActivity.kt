@@ -29,6 +29,7 @@ import com.example.planty.ui.screens.home.HomeScreen
 import com.example.planty.ui.screens.settings.SettingsScreen
 import com.example.planty.ui.settings.SettingsViewModel
 import com.example.planty.ui.PlantyTheme
+import com.example.planty.ui.screens.splash.SplashScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,7 +87,17 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    NavHost(navController = navController, startDestination = "home") {
+                    NavHost(navController = navController, startDestination = "splash") {
+
+                        composable("splash") {
+                            SplashScreen(
+                                onNavigateToHome = {
+                                    navController.navigate("home") {
+                                        popUpTo("splash") { inclusive = true }
+                                    }
+                                }
+                            )
+                        }
 
                         composable("home") {
                             HomeScreen(
