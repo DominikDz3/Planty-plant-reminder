@@ -7,13 +7,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.planty.data.database.entity.Plant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,6 +23,32 @@ fun HomeScreen(
     onNavigateToDetails: (Int) -> Unit
 ) {
     val plantList by viewModel.plantList.collectAsState()
+
+    // Stan przechowujący roślinę do usunięcia.
+    // Jeśli nie jest null, wyświetlamy dialog.
+    var plantToDelete by remember { mutableStateOf<Plant?>(null) }
+
+    // Dialog potwierdzenia usuwania
+    if (plantToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { plantToDelete = null },
+            title = { Text("Usuń roślinę") },
+            text = { Text("Czy na pewno chcesz usunąć roślinę \"${plantToDelete?.name}\"?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    plantToDelete?.let { viewModel.deletePlant(it) }
+                    plantToDelete = null
+                }) {
+                    Text("Usuń", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { plantToDelete = null }) {
+                    Text("Anuluj")
+                }
+            }
+        )
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -69,7 +94,8 @@ fun HomeScreen(
                 PlantListItem(
                     plant = plant,
                     onClick = { onNavigateToDetails(plant.id) },
-                    onDeleteClick = { viewModel.deletePlant(plant) }
+                    // ZMIANA: Zamiast usuwać od razu, ustawiamy zmienną, co wywoła dialog
+                    onDeleteClick = { plantToDelete = plant }
                 )
             }
         }
