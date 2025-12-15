@@ -24,11 +24,8 @@ fun HomeScreen(
 ) {
     val plantList by viewModel.plantList.collectAsState()
 
-    // Stan przechowujący roślinę do usunięcia.
-    // Jeśli nie jest null, wyświetlamy dialog.
     var plantToDelete by remember { mutableStateOf<Plant?>(null) }
 
-    // Dialog potwierdzenia usuwania
     if (plantToDelete != null) {
         AlertDialog(
             onDismissRequest = { plantToDelete = null },
@@ -94,7 +91,6 @@ fun HomeScreen(
                 PlantListItem(
                     plant = plant,
                     onClick = { onNavigateToDetails(plant.id) },
-                    // ZMIANA: Zamiast usuwać od razu, ustawiamy zmienną, co wywoła dialog
                     onDeleteClick = { plantToDelete = plant }
                 )
             }
