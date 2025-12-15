@@ -68,4 +68,5 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.icons.extended)
     ksp(libs.room.compiler)
+    implementation(libs.gson)
 }

@@ -1,4 +1,4 @@
-package com.example.planty.data.database
+package com.example.planty.data.database.converters
 
 import androidx.room.TypeConverter
 

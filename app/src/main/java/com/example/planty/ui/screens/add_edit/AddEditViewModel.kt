@@ -28,19 +28,14 @@ class AddEditViewModel(
 
     private val _plantName = MutableStateFlow("")
     val plantName = _plantName.asStateFlow()
-
     private val _plantDescription = MutableStateFlow("")
     val plantDescription = _plantDescription.asStateFlow()
-
     private val _wateringFreq = MutableStateFlow("")
     val wateringFreq = _wateringFreq.asStateFlow()
-
     private val _photoUris = MutableStateFlow<List<String>>(emptyList())
     val photoUris = _photoUris.asStateFlow()
-
     private val _lastWateredDate = MutableStateFlow(System.currentTimeMillis())
     val lastWateredDate = _lastWateredDate.asStateFlow()
-
     private var tempCameraUri: Uri? = null
 
     fun onNameChange(newName: String) {
@@ -78,10 +73,8 @@ class AddEditViewModel(
             directory.mkdirs()
         }
         val file = File(directory, "img_cam_${UUID.randomUUID()}.jpg")
-
         val authority = "${application.packageName}.provider"
         val uri = FileProvider.getUriForFile(application, authority, file)
-
         tempCameraUri = uri
         return uri
     }
@@ -97,13 +90,10 @@ class AddEditViewModel(
         return try {
             val contentResolver = application.contentResolver
             val inputStream = contentResolver.openInputStream(uri) ?: return null
-
             val directory = File(application.filesDir, "plant_images")
             if (!directory.exists()) { directory.mkdirs() }
-
             val fileName = "img_gallery_${UUID.randomUUID()}.jpg"
             val file = File(directory, fileName)
-
             val outputStream = FileOutputStream(file)
             inputStream.use { input ->
                 outputStream.use { output ->
@@ -120,7 +110,6 @@ class AddEditViewModel(
     fun removePhoto(uri: String) {
         _photoUris.value = _photoUris.value.filter { it != uri }
     }
-
     fun savePlant(onSuccess: () -> Unit) {
         val name = _plantName.value
         val freq = _wateringFreq.value.toIntOrNull()
@@ -132,13 +121,16 @@ class AddEditViewModel(
         }
 
         viewModelScope.launch {
+            val initialHistory = listOf(lastWatered)
+
             val newPlant = Plant(
                 id = 0,
                 name = name,
                 description = description,
                 wateringFrequencyDays = freq,
                 photoUris = _photoUris.value,
-                lastWatered = lastWatered
+                lastWatered = lastWatered,
+                wateringHistory = initialHistory
             )
             repository.addPlant(newPlant)
             onSuccess()

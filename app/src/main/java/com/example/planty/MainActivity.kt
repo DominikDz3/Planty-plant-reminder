@@ -20,16 +20,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.planty.notifications.NotificationService
 import com.example.planty.ui.screens.add_edit.AddEditPlantScreen
+import com.example.planty.ui.screens.home.PlantDetailsScreen
 import com.example.planty.ui.screens.home.HomeScreen
 import com.example.planty.ui.screens.settings.SettingsScreen
+import com.example.planty.ui.screens.splash.SplashScreen
 import com.example.planty.ui.settings.SettingsViewModel
 import com.example.planty.ui.PlantyTheme
-import com.example.planty.ui.screens.splash.SplashScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,11 +64,7 @@ class MainActivity : ComponentActivity() {
                     LaunchedEffect(Unit) {
                         val plantIdFromNotif = intent.getIntExtra("plantId_from_notification", -1)
                         if (plantIdFromNotif != -1) {
-                            Toast.makeText(
-                                context,
-                                "Otwarto z powiadomienia dla rośliny ID: $plantIdFromNotif",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            navController.navigate("details/$plantIdFromNotif")
                         }
                     }
 
@@ -108,7 +107,7 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate("settings")
                                 },
                                 onNavigateToDetails = { plantId ->
-                                    Toast.makeText(context, "Szczegóły rośliny ID: $plantId", Toast.LENGTH_SHORT).show()
+                                    navController.navigate("details/$plantId")
                                 }
                             )
                         }
@@ -124,6 +123,19 @@ class MainActivity : ComponentActivity() {
                         composable("settings") {
                             SettingsScreen(
                                 viewModel = settingsViewModel,
+                                onNavigateBack = {
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+
+                        composable(
+                            route = "details/{plantId}",
+                            arguments = listOf(navArgument("plantId") { type = NavType.IntType })
+                        ) { backStackEntry ->
+                            val plantId = backStackEntry.arguments?.getInt("plantId") ?: 0
+                            PlantDetailsScreen(
+                                plantId = plantId,
                                 onNavigateBack = {
                                     navController.popBackStack()
                                 }

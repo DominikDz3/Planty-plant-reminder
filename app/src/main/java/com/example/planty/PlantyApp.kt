@@ -9,9 +9,8 @@ class PlantyApp : Application() {
 
     val database by lazy { AppDatabase.getDatabase(this) }
 
-
     val plantRepository by lazy {
-        PlantRepository(database.getPlantDao(), database.getWaterHistoryDao())
+        PlantRepository(database.getPlantDao())
     }
 
     val settingsRepository by lazy {
