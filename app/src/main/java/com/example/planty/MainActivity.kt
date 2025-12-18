@@ -27,7 +27,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.planty.notifications.NotificationService
 import com.example.planty.ui.screens.add_edit.AddEditPlantScreen
-import com.example.planty.ui.screens.home.PlantDetailsScreen
+import com.example.planty.ui.screens.details.PlantDetailsScreen
 import com.example.planty.ui.screens.home.HomeScreen
 import com.example.planty.ui.screens.settings.SettingsScreen
 import com.example.planty.ui.screens.splash.SplashScreen

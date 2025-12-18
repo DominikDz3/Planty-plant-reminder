@@ -1,4 +1,4 @@
-package com.example.planty.ui.screens.home
+package com.example.planty.ui.screens.details
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Opacity
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.*
@@ -60,15 +61,6 @@ fun PlantDetailsScreen(
                     containerColor = Color.Transparent
                 )
             )
-        },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { viewModel.waterPlantNow() },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                icon = { Icon(Icons.Default.WaterDrop, null) },
-                text = { Text("Podlej teraz") }
-            )
         }
     ) { paddingValues ->
         if (plant != null) {
@@ -77,7 +69,7 @@ fun PlantDetailsScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(bottom = paddingValues.calculateBottomPadding())
-                    .padding(bottom = 80.dp)
+                    .padding(bottom = 16.dp)
             ) {
                 Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
                     val photo = plant!!.photoUris.firstOrNull()
@@ -197,69 +189,141 @@ fun WateringCalendar(
     history: List<Long>,
     onDateClick: (Long) -> Unit
 ) {
-    val calendar = Calendar.getInstance()
-    val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
-    val today = calendar.get(Calendar.DAY_OF_MONTH)
+    var displayedMonth by remember { mutableStateOf(Calendar.getInstance()) }
 
-    val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-    val historyStrings = history.map { sdf.format(Date(it)) }
+    val monthTitle = remember(displayedMonth.timeInMillis) {
+        val sdf = SimpleDateFormat("LLLL yyyy", Locale("pl"))
+        val dateStr = sdf.format(displayedMonth.time)
+        dateStr.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale("pl")) else it.toString() }
+    }
+
+    val daysInMonth = displayedMonth.getActualMaximum(Calendar.DAY_OF_MONTH)
+
+    val firstDayOfMonth = (displayedMonth.clone() as Calendar).apply {
+        set(Calendar.DAY_OF_MONTH, 1)
+    }
+
+    val startOffset = (firstDayOfMonth.get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY + 7) % 7
+
+    val sdfCompare = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+    val historyStrings = history.map { sdfCompare.format(Date(it)) }
+
+    val todayCal = Calendar.getInstance()
+    val isCurrentMonth = todayCal.get(Calendar.YEAR) == displayedMonth.get(Calendar.YEAR) &&
+            todayCal.get(Calendar.MONTH) == displayedMonth.get(Calendar.MONTH)
+    val todayDay = if (isCurrentMonth) todayCal.get(Calendar.DAY_OF_MONTH) else -1
 
     Column {
-        Text(
-            text = SimpleDateFormat("LLLL yyyy", Locale.getDefault()).format(Date()),
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 8.dp)
-        )
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(7),
-            modifier = Modifier.height(300.dp),
-            userScrollEnabled = false
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            val weekDays = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "Sb", "Nd")
-            items(weekDays) { day ->
-                Text(
-                    text = day,
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.outline
+            IconButton(onClick = {
+                val newCal = (displayedMonth.clone() as Calendar)
+                newCal.add(Calendar.MONTH, -1)
+                displayedMonth = newCal
+            }) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Poprzedni miesiąc",
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
 
-            items(daysInMonth) { dayIndex ->
-                val day = dayIndex + 1
+            Text(
+                text = monthTitle,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
 
-                calendar.set(Calendar.DAY_OF_MONTH, day)
-                val currentDayMillis = calendar.timeInMillis
-                val dateString = sdf.format(Date(currentDayMillis))
+            IconButton(onClick = {
+                val newCal = (displayedMonth.clone() as Calendar)
+                newCal.add(Calendar.MONTH, 1)
+                displayedMonth = newCal
+            }) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = "Następny miesiąc",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
 
-                val isWatered = historyStrings.contains(dateString)
-                val isToday = day == today
+        Column(modifier = Modifier.fillMaxWidth()) {
 
-                Box(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .aspectRatio(1f)
-                        .clip(CircleShape)
-                        .clickable { onDateClick(currentDayMillis) }
-                        .background(
-                            when {
-                                isWatered -> MaterialTheme.colorScheme.primary
-                                isToday -> MaterialTheme.colorScheme.secondaryContainer
-                                else -> Color.Transparent
-                            }
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = if (isToday) MaterialTheme.colorScheme.primary else Color.Transparent,
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                val weekDays = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "Sb", "Nd")
+                weekDays.forEach { day ->
                     Text(
-                        text = day.toString(),
-                        color = if (isWatered) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                        text = day,
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(bottom = 8.dp)
                     )
+                }
+            }
+
+            val calendarDays = mutableListOf<Int?>()
+            repeat(startOffset) { calendarDays.add(null) }
+            for (day in 1..daysInMonth) { calendarDays.add(day) }
+
+            val weeks = calendarDays.chunked(7)
+
+            weeks.forEach { week ->
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    for (i in 0 until 7) {
+                        if (i < week.size) {
+                            val day = week[i]
+                            if (day != null) {
+                                val cellCal = (displayedMonth.clone() as Calendar).apply {
+                                    set(Calendar.DAY_OF_MONTH, day)
+                                }
+                                val currentDayMillis = cellCal.timeInMillis
+                                val dateString = sdfCompare.format(Date(currentDayMillis))
+
+                                val isWatered = historyStrings.contains(dateString)
+                                val isToday = (day == todayDay)
+
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .aspectRatio(1f)
+                                        .padding(4.dp)
+                                        .clip(CircleShape)
+                                        .clickable { onDateClick(currentDayMillis) }
+                                        .background(
+                                            when {
+                                                isWatered -> MaterialTheme.colorScheme.primary
+                                                isToday -> MaterialTheme.colorScheme.secondaryContainer
+                                                else -> Color.Transparent
+                                            }
+                                        )
+                                        .border(
+                                            width = 1.dp,
+                                            color = if (isToday) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = day.toString(),
+                                        color = if (isWatered) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            } else {
+                                Box(modifier = Modifier.weight(1f).aspectRatio(1f))
+                            }
+                        } else {
+                            Box(modifier = Modifier.weight(1f).aspectRatio(1f))
+                        }
+                    }
                 }
             }
         }

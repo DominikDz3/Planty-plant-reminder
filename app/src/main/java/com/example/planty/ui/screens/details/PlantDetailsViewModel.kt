@@ -1,4 +1,4 @@
-package com.example.planty.ui.screens.home
+package com.example.planty.ui.screens.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -34,36 +34,27 @@ class PlantDetailsViewModel(
             }
         }
     }
-
-    // Funkcja do szybkiego podlania "Teraz" (przycisk FAB)
     fun waterPlantNow() {
         toggleWateringStatus(System.currentTimeMillis())
     }
-
-    // NOWE: Funkcja do zaznaczania/odznaczania daty w kalendarzu
     fun toggleWateringStatus(dateMillis: Long) {
         val currentPlant = _plant.value ?: return
 
-        // Formatujemy daty do samego dnia (ignorujemy godziny), żeby porównywać tylko dni
         val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
         val targetDay = sdf.format(Date(dateMillis))
 
         val currentHistory = currentPlant.wateringHistory.toMutableList()
 
-        // Sprawdzamy, czy ten dzień już jest w historii
         val existingEntry = currentHistory.find {
             sdf.format(Date(it)) == targetDay
         }
 
         if (existingEntry != null) {
-            // Jeśli jest -> usuwamy (odznaczamy)
             currentHistory.remove(existingEntry)
         } else {
-            // Jeśli nie ma -> dodajemy
             currentHistory.add(dateMillis)
         }
 
-        // Sortujemy historię i znajdujemy najnowszą datę, żeby zaktualizować "Ostatnie podlanie"
         currentHistory.sortDescending()
         val newLastWatered = currentHistory.firstOrNull() ?: currentPlant.lastWatered
 
@@ -74,14 +65,14 @@ class PlantDetailsViewModel(
 
         viewModelScope.launch {
             repository.updatePlant(updatedPlant)
-            // Widok zaktualizuje się sam dzięki .collect w loadPlant
         }
     }
 
     companion object {
         fun provideFactory(plantId: Int): ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                val app = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as PlantyApp)
+                val app =
+                    (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as PlantyApp)
                 PlantDetailsViewModel(app.plantRepository, plantId)
             }
         }
