@@ -1,6 +1,7 @@
 package com.example.planty.data.database.converters
 
 import androidx.room.TypeConverter
+import com.example.planty.data.database.entity.TimelineEntry
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -18,8 +19,7 @@ class DateConverter {
         return Gson().toJson(list ?: emptyList<Long>())
     }
 
-    // --- NOWE: Konwertery dla Zdjęć (List<String>) ---
-    // To naprawi błąd w Plant.kt
+    // --- Konwertery dla Zdjęć (List<String>) ---
     @TypeConverter
     fun fromStringList(value: String?): List<String> {
         if (value == null) return emptyList()
@@ -30,5 +30,18 @@ class DateConverter {
     @TypeConverter
     fun toStringList(list: List<String>?): String {
         return Gson().toJson(list ?: emptyList<String>())
+    }
+
+    // --- NOWE: Konwertery dla Osi Czasu (List<TimelineEntry>) ---
+    @TypeConverter
+    fun fromTimelineList(value: String?): List<TimelineEntry> {
+        if (value == null) return emptyList()
+        val listType = object : TypeToken<List<TimelineEntry>>() {}.type
+        return Gson().fromJson(value, listType) ?: emptyList()
+    }
+
+    @TypeConverter
+    fun toTimelineList(list: List<TimelineEntry>?): String {
+        return Gson().toJson(list ?: emptyList<TimelineEntry>())
     }
 }

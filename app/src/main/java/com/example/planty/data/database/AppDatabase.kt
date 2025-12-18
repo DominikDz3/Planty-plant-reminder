@@ -9,7 +9,7 @@ import com.example.planty.data.database.dao.PlantDao
 import com.example.planty.data.database.entity.Plant
 import com.example.planty.data.database.converters.Converters
 
-@Database(version = 4, entities = [Plant::class], exportSchema = false)
+@Database(version = 5, entities = [Plant::class], exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun getPlantDao(): PlantDao
