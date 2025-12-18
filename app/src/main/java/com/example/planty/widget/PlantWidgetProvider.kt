@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.widget.RemoteViews
 import com.example.planty.MainActivity
 import com.example.planty.R
@@ -35,11 +34,7 @@ class PlantWidgetProvider : AppWidgetProvider() {
         appWidgetId: Int
     ) {
         CoroutineScope(Dispatchers.IO).launch {
-            // Pobranie bazy danych
             val database = AppDatabase.getDatabase(context)
-
-            // Pobranie DAO.
-            // Jeśli w AppDatabase.kt masz "getPlantDao()", zmień tę linijkę na database.getPlantDao()
             val dao: PlantDao = database.getPlantDao()
 
             val plants: List<Plant> = try {
@@ -52,7 +47,6 @@ class PlantWidgetProvider : AppWidgetProvider() {
             var plantsToWaterCount = 0
 
             plants.forEach { plant ->
-                // Obliczamy datę następnego podlania
                 val nextWateringDate = plant.lastWatered + (plant.wateringFrequencyDays * 24 * 60 * 60 * 1000L)
                 if (nextWateringDate <= now) {
                     plantsToWaterCount++
@@ -68,11 +62,8 @@ class PlantWidgetProvider : AppWidgetProvider() {
             }
 
             val intent = Intent(context, MainActivity::class.java)
-            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val flags =
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            } else {
-                PendingIntent.FLAG_UPDATE_CURRENT
-            }
 
             val pendingIntent = PendingIntent.getActivity(
                 context,
