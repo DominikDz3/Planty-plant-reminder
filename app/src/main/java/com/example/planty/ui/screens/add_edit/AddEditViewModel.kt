@@ -28,32 +28,36 @@ class AddEditViewModel(
 
     private val _plantName = MutableStateFlow("")
     val plantName = _plantName.asStateFlow()
+
     private val _plantDescription = MutableStateFlow("")
     val plantDescription = _plantDescription.asStateFlow()
+
     private val _wateringFreq = MutableStateFlow("")
     val wateringFreq = _wateringFreq.asStateFlow()
+
     private val _photoUris = MutableStateFlow<List<String>>(emptyList())
     val photoUris = _photoUris.asStateFlow()
+
     private val _lastWateredDate = MutableStateFlow(System.currentTimeMillis())
     val lastWateredDate = _lastWateredDate.asStateFlow()
+
+    private val _notificationTime = MutableStateFlow(32400000L)
+    val notificationTime = _notificationTime.asStateFlow()
+
     private var tempCameraUri: Uri? = null
 
-    fun onNameChange(newName: String) {
-        _plantName.value = newName
-    }
-
-    fun onDescriptionChange(newDesc: String) {
-        _plantDescription.value = newDesc
-    }
-
+    fun onNameChange(newName: String) { _plantName.value = newName }
+    fun onDescriptionChange(newDesc: String) { _plantDescription.value = newDesc }
     fun onFrequencyChange(newFreq: String) {
         if (newFreq.all { it.isDigit() }) {
             _wateringFreq.value = newFreq
         }
     }
+    fun onDateChange(newDate: Long) { _lastWateredDate.value = newDate }
 
-    fun onDateChange(newDate: Long) {
-        _lastWateredDate.value = newDate
+    fun onTimeChange(hour: Int, minute: Int) {
+        val timeInMillis = (hour * 60 * 60 * 1000L) + (minute * 60 * 1000L)
+        _notificationTime.value = timeInMillis
     }
 
     fun onPhotosSelected(uris: List<String>) {
@@ -63,15 +67,13 @@ class AddEditViewModel(
                     copyImageToInternalStorage(uriString.toUri())
                 }
             }
-            _photoUris.value = _photoUris.value + copiedUris
+            _photoUris.value += copiedUris
         }
     }
 
     fun createUriForCamera(): Uri {
         val directory = File(application.filesDir, "plant_images")
-        if (!directory.exists()) {
-            directory.mkdirs()
-        }
+        if (!directory.exists()) { directory.mkdirs() }
         val file = File(directory, "img_cam_${UUID.randomUUID()}.jpg")
         val authority = "${application.packageName}.provider"
         val uri = FileProvider.getUriForFile(application, authority, file)
@@ -81,7 +83,7 @@ class AddEditViewModel(
 
     fun onPhotoTaken(success: Boolean) {
         if (success && tempCameraUri != null) {
-            _photoUris.value = _photoUris.value + tempCameraUri.toString()
+            _photoUris.value += tempCameraUri.toString()
         }
         tempCameraUri = null
     }
@@ -110,11 +112,13 @@ class AddEditViewModel(
     fun removePhoto(uri: String) {
         _photoUris.value = _photoUris.value.filter { it != uri }
     }
+
     fun savePlant(onSuccess: () -> Unit) {
         val name = _plantName.value
         val freq = _wateringFreq.value.toIntOrNull()
         val description = _plantDescription.value
         val lastWatered = _lastWateredDate.value
+        val notifTime = _notificationTime.value
 
         if (name.isBlank() || freq == null) {
             return
@@ -130,7 +134,8 @@ class AddEditViewModel(
                 wateringFrequencyDays = freq,
                 photoUris = _photoUris.value,
                 lastWatered = lastWatered,
-                wateringHistory = initialHistory
+                wateringHistory = initialHistory,
+                notificationTime = notifTime
             )
             repository.addPlant(newPlant)
             onSuccess()

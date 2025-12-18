@@ -16,5 +16,6 @@ data class Plant(
     val lastWatered: Long,
     val photoUris: List<String> = emptyList(),
 
-    val wateringHistory: List<Long> = emptyList()
+    val wateringHistory: List<Long> = emptyList(),
+    val notificationTime: Long = 32400000
 )

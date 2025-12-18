@@ -1,6 +1,7 @@
 package com.example.planty.ui.screens.add_edit
 
 import android.Manifest
+import android.app.TimePickerDialog
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
@@ -10,6 +11,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -20,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
@@ -56,9 +60,25 @@ fun AddEditPlantScreen(
     val frequency by viewModel.wateringFreq.collectAsState()
     val photoUris by viewModel.photoUris.collectAsState()
     val lastWateredDate by viewModel.lastWateredDate.collectAsState()
+    val notificationTime by viewModel.notificationTime.collectAsState()
 
     var showDatePicker by remember { mutableStateOf(false) }
     var showImageSourceDialog by remember { mutableStateOf(false) }
+
+    val timePickerDialog = remember {
+        val initialHour = (notificationTime / (1000 * 60 * 60)).toInt()
+        val initialMinute = ((notificationTime / (1000 * 60)) % 60).toInt()
+
+        TimePickerDialog(
+            context,
+            { _, hour: Int, minute: Int ->
+                viewModel.onTimeChange(hour, minute)
+            },
+            initialHour,
+            initialMinute,
+            true
+        )
+    }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 5),
@@ -218,9 +238,7 @@ fun AddEditPlantScreen(
                             }
                         }
                     }
-                    item {
-                        AddPhotoButton(onClick = { showImageSourceDialog = true })
-                    }
+                    item { AddPhotoButton(onClick = { showImageSourceDialog = true }) }
                 }
             } else {
                 AddPhotoButton(
@@ -292,6 +310,45 @@ fun AddEditPlantScreen(
                         disabledTrailingIconColor = MaterialTheme.colorScheme.primary
                     )
                 )
+                Box(modifier = Modifier.matchParentSize().clickable { showDatePicker = true })
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            val hours = (notificationTime / (1000 * 60 * 60)).toInt()
+            val minutes = ((notificationTime / (1000 * 60)) % 60).toInt()
+            val timeText = String.format(Locale.getDefault(), "%02d:%02d", hours, minutes)
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { timePickerDialog.show() }
+            ) {
+                OutlinedTextField(
+                    value = timeText,
+                    onValueChange = {},
+                    readOnly = true,
+                    enabled = false,
+                    label = { Text("Godzina powiadomienia", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    trailingIcon = {
+                        Icon(
+                            Icons.Default.AccessTime,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.primary
+                    )
+                )
+                Box(modifier = Modifier.matchParentSize().clickable { timePickerDialog.show() })
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -311,6 +368,7 @@ fun AddEditPlantScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
+            // Zapisz
             Button(
                 onClick = { viewModel.savePlant(onSuccess = onNavigateBack) },
                 modifier = Modifier
@@ -332,7 +390,7 @@ fun AddEditPlantScreen(
 }
 
 @Composable
-fun AddPhotoButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun AddPhotoButton(modifier: Modifier = Modifier.size(100.dp, 160.dp), onClick: () -> Unit) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
@@ -349,7 +407,7 @@ fun AddPhotoButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
                 modifier = Modifier.size(32.dp)
             )
             Text(
-                "Dodaj zdjęcie",
+                "Wybierz zdjęcie",
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 12.sp
             )
