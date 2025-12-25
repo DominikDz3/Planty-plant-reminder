@@ -7,13 +7,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.planty"
+    namespace = "pl.edu.ur.dd131428.planty"
     compileSdk {
         version = release(35)
     }
 
     defaultConfig {
-        applicationId = "com.example.planty"
+        applicationId = "pl.edu.ur.dd131428.planty"
         minSdk = 32
         targetSdk = 35
         versionCode = 1

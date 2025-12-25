@@ -1,0 +1,34 @@
+package pl.edu.ur.dd131428.planty.data.database
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import pl.edu.ur.dd131428.planty.data.database.dao.PlantDao
+import pl.edu.ur.dd131428.planty.data.database.entity.Plant
+import pl.edu.ur.dd131428.planty.data.database.converters.Converters
+
+@Database(version = 5, entities = [Plant::class], exportSchema = false)
+@TypeConverters(Converters::class)
+abstract class AppDatabase: RoomDatabase() {
+    abstract fun getPlantDao(): PlantDao
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getDatabase(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "Planty_database"
+                )
+                    .fallbackToDestructiveMigration(false)
+                    .build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
+}
