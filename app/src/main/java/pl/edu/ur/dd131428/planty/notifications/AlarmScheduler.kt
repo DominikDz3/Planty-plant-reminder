@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import pl.edu.ur.dd131428.planty.data.database.entity.Plant
 import java.util.Calendar
 
@@ -17,13 +18,16 @@ class AlarmScheduler(private val context: Context) {
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = plant.lastWatered
 
+        // Resetujemy do północy
         calendar.set(Calendar.HOUR_OF_DAY, 0)
         calendar.set(Calendar.MINUTE, 0)
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
 
+        // Dodajemy pierwszy cykl
         calendar.add(Calendar.DAY_OF_YEAR, plant.wateringFrequencyDays)
 
+        // Ustawiamy godzinę
         val hour = (plant.notificationTime / (1000 * 60 * 60)).toInt()
         val minute = ((plant.notificationTime / (1000 * 60)) % 60).toInt()
 
@@ -32,10 +36,17 @@ class AlarmScheduler(private val context: Context) {
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
 
-        if (calendar.timeInMillis <= System.currentTimeMillis()) {
-            Log.d("AlarmScheduler", "Czas minął, przesunięto alarm na kolejny cykl.")
+        // POPRAWKA: Pętla while. Jeśli wyliczona data jest w przeszłości,
+        // dodajemy kolejne cykle (dni) tak długo, aż trafimy w przyszłość.
+        // To naprawia problem "Termin minął" przy testowaniu.
+        val now = System.currentTimeMillis()
+        while (calendar.timeInMillis <= now) {
             calendar.add(Calendar.DAY_OF_YEAR, plant.wateringFrequencyDays)
         }
+
+        // Logowanie daty alarmu (sprawdź w Logcat po tagu "AlarmScheduler")
+        Log.d("AlarmScheduler", "Ustawiam alarm dla ${plant.name} na: ${calendar.time}")
+        // Toast.makeText(context, "Alarm: ${calendar.time}", Toast.LENGTH_LONG).show()
 
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("PLANT_ID", plant.id)

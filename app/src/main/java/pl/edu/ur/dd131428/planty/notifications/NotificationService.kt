@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import pl.edu.ur.dd131428.planty.MainActivity
@@ -16,6 +17,7 @@ class NotificationService(private val context: Context) {
     private val channelName = "Przypomnienia o podlewaniu"
 
     fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
                 channelName,
@@ -25,6 +27,7 @@ class NotificationService(private val context: Context) {
             }
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
+        }
     }
 
     fun showWateringNotification(plantId: Int, plantName: String) {
@@ -34,11 +37,17 @@ class NotificationService(private val context: Context) {
             putExtra("plantId_from_notification", plantId)
         }
 
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+
         val activityPendingIntent = PendingIntent.getActivity(
             context,
             plantId,
             activityIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            flags
         )
 
         val actionIntent = Intent(context, WateringReceiver::class.java).apply {
@@ -50,7 +59,7 @@ class NotificationService(private val context: Context) {
             context,
             plantId,
             actionIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            flags
         )
 
         val builder = NotificationCompat.Builder(context, channelId)
@@ -58,9 +67,8 @@ class NotificationService(private val context: Context) {
             .setContentTitle("Czas podlać: $plantName")
             .setContentText("Twoja roślinka potrzebuje wody!")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setContentIntent(activityPendingIntent)
+            .setContentIntent(activityPendingIntent) // Kliknięcie w treść -> otwiera apkę
             .setAutoCancel(true)
-
             .addAction(
                 R.drawable.ic_launcher_foreground,
                 "Podlano",
